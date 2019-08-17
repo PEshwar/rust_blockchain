@@ -1,0 +1,20 @@
+[package]
+name = "p2p-blockchain"
+version = "0.1.0"
+authors = ["PEshwar <par.esh1937@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libp2p = { git = "https://github.com/libp2p/rust-libp2p" }
+futures = "0.1"
+tokio = "0.1"
+tokio-stdin-stdout = "0.1"
+serde = "1.0.98"
+serde_json = "1.0.40"
+serde_derive = "1.0.98"
+crypto-hash = "0.3.3"
+
+[dev-dependencies]
+env_logger = "0.6.0"
