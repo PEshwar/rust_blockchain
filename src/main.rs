@@ -13,7 +13,7 @@ use blockchain::*;
 use std::fs::File;
 use std::io::{Read, Write};
 
-fn process_block(new_txn_text: &str) {
+fn process_new_transaction(new_txn_text: &str) {
     println!("Recvd in process_block {}", new_txn_text);
 
     let mut file = File::open("Blockchain.json").expect("Unable to open");
@@ -35,14 +35,9 @@ fn process_block(new_txn_text: &str) {
     };
     let mut new_block = Block::new(0, vec![new_txn], &bc[bc.len() - 1]);
 
-    Block::mine_without_iterator(&mut new_block, &PREFIX);
+    Block::mine_new_block(&mut new_block, &PREFIX);
     bc.push(new_block);
-    /*let mut file2 = OpenOptions::new()
-                        .append(true)
-                        .open("Blockchain.json")
-                        .unwrap();
-    file2.write_all(serde_json::to_string(&bc).unwrap().as_bytes());
-    */
+
     let mut file2 = File::create("Blockchain.json").expect("Unable to write file");
     file2
         .write_all(serde_json::to_string(&bc).unwrap().as_bytes())
@@ -56,7 +51,7 @@ fn process_block(new_txn_text: &str) {
 }
 
 fn main() {
-    println!("JGD!");
+    println!("Welcome to P2P Rust Blockchain experiment");
 
     //create blockchain
     let p2p_bc: Vec<Block> = vec![Block::genesis()];
@@ -82,7 +77,6 @@ fn main() {
     struct MyBehaviour<TSubstream: libp2p::tokio_io::AsyncRead + libp2p::tokio_io::AsyncWrite> {
         floodsub: libp2p::floodsub::Floodsub<TSubstream>,
         mdns: libp2p::mdns::Mdns<TSubstream>,
-        //bc: Blockchain,
     }
 
     impl<TSubstream: libp2p::tokio_io::AsyncRead + libp2p::tokio_io::AsyncWrite>
@@ -119,8 +113,8 @@ fn main() {
                     String::from_utf8_lossy(&message.data),
                     message.source
                 );
-
-                process_block(&mut String::from_utf8_lossy(&message.data));
+                // receive new transaction from P2P event stream , mine a new block and append it to blockchain
+                process_new_transaction(&mut String::from_utf8_lossy(&message.data));
             }
         }
     }
@@ -130,7 +124,6 @@ fn main() {
         let mut behaviour = MyBehaviour {
             floodsub: libp2p::floodsub::Floodsub::new(local_peer_id.clone()),
             mdns: libp2p::mdns::Mdns::new().expect("Failed to create mDNS service"),
-            //bc: p2p_bc,
         };
 
         behaviour.floodsub.subscribe(floodsub_topic.clone());

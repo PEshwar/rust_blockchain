@@ -59,22 +59,10 @@ impl Block {
         }
     }
 
-    pub fn mine_without_iterator(block_candidate: &mut Block, prefix: &str) {
+    pub fn mine_new_block(block_candidate: &mut Block, prefix: &str) {
         while !Self::valid(&Self::hash(block_candidate), prefix) {
             println!("{}", block_candidate.proof);
             block_candidate.proof += 1
         }
-    }
-    pub fn _mine_with_iterator(block_candidate: &Block, prefix: &str) -> Block {
-        (0..)
-            .map(|proof| Block {
-                index: block_candidate.index,
-                timestamp: block_candidate.timestamp,
-                proof: proof,
-                transactions: block_candidate.transactions.clone(),
-                previous_block_hash: block_candidate.previous_block_hash.clone(),
-            })
-            .find(|b| Self::valid(&Self::hash(b), prefix))
-            .unwrap()
     }
 }
