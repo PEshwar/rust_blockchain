@@ -2,9 +2,6 @@ extern crate crypto_hash;
 extern crate serde_json;
 
 use crypto_hash::{hex_digest, Algorithm};
-//use std::io;
-
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Transaction {
@@ -12,11 +9,6 @@ pub struct Transaction {
     pub timestamp: u64,
     pub payload: String,
 }
-
-//pub type Blockchain = Vec<Block>;
-
-
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Block {
@@ -86,37 +78,3 @@ impl Block {
             .unwrap()
     }
 }
-/*
-fn main() {
-    println!("Hello, blockchain!");
-
-    //create blockchain
-    let mut blockchain: Blockchain = vec![Block::genesis()];
-    println!("1: Blockchain is {:?}", blockchain);
-
-    loop {
-        let mut new_txn_text = String::new();
-        println!(
-            "So far {} blocks have been created. Please enter transaction details and press enter",
-            blockchain.len()
-        );
-        io::stdin()
-            .read_line(&mut new_txn_text)
-            .expect("Failed to read transaction detail");
-        let new_txn = Transaction {
-            id: String::from("1"),
-            timestamp: 0,
-            payload: String::from(new_txn_text),
-        };
-        let mut new_block = Block::new(0, vec![new_txn], &blockchain[blockchain.len() - 1]);
-
-        Block::mine_without_iterator(&mut new_block, &PREFIX);
-
-        blockchain.push(new_block);
-        for block in blockchain.iter() {
-            println!("Block for index {} is {}", block.index, block.to_json());
-        }
-    }
-
-}
-*/
