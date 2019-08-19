@@ -1,21 +1,23 @@
 extern crate crypto_hash;
 extern crate serde_json;
+extern crate chrono;
 
 use crypto_hash::{hex_digest, Algorithm};
+use chrono::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Transaction {
-    pub id: String,
-    pub timestamp: u64,
-    pub payload: String,
+    pub transaction_id: String,
+    pub transaction_timestamp: i64,
+    pub transaction_details: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Block {
-    pub index: u64,
-    timestamp: u64,
-    pub proof: u64,
-    transactions: Vec<Transaction>,
+    pub block_number: u64,
+    block_timestamp: i64,
+    pub block_nonce: u64,
+    pub transaction_list: Vec<Transaction>,
     previous_block_hash: String,
 }
 
@@ -24,45 +26,45 @@ pub const PREFIX: &str = "00";
 impl Block {
     pub fn genesis() -> Self {
         let transaction = Transaction {
-            id: String::from("1"),
-            payload: String::from("This is dummy transaction as genesis block has no transactions"),
-            timestamp: 0,
+            transaction_id: String::from("1"),
+            transaction_details: String::from("This is dummy transaction as genesis block has no transactions"),
+            transaction_timestamp: Utc::now().timestamp(),
         };
         Block {
-            index: 1,
-            timestamp: 0,
-            proof: 0,
-            transactions: vec![transaction],
+            block_number: 1,
+            block_timestamp: Utc::now().timestamp(),
+            block_nonce: 0,
+            transaction_list: vec![transaction],
             previous_block_hash: String::from("0"),
         }
     }
 
-    pub fn to_json(&self) -> String {
+    pub fn serialize_block(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
 
-    pub fn hash(block: &Block) -> String {
-        hex_digest(Algorithm::SHA256, block.to_json().as_bytes())
+    pub fn generate_hash(block: &Block) -> String {
+        hex_digest(Algorithm::SHA256, block.serialize_block().as_bytes())
     }
 
-    pub fn valid(hash: &str, prefix: &str) -> bool {
+    pub fn is_block_valid(hash: &str, prefix: &str) -> bool {
         hash.starts_with(prefix)
     }
 
-    pub fn new(timestamp: u64, transactions: Vec<Transaction>, previous_block: &Block) -> Block {
+    pub fn new(transactions: Vec<Transaction>, previous_block: &Block) -> Block {
         Block {
-            index: previous_block.index + 1,
-            timestamp: timestamp,
-            proof: 0,
-            transactions: transactions,
-            previous_block_hash: Self::hash(previous_block),
+            block_number: previous_block.block_number + 1,
+            block_timestamp: Utc::now().timestamp(),
+            block_nonce: 0,
+            transaction_list: transactions,
+            previous_block_hash: Self::generate_hash(previous_block),
         }
     }
 
     pub fn mine_new_block(block_candidate: &mut Block, prefix: &str) {
-        while !Self::valid(&Self::hash(block_candidate), prefix) {
-            println!("{}", block_candidate.proof);
-            block_candidate.proof += 1
+        while !Self::is_block_valid(&Self::generate_hash(block_candidate), prefix) {
+            println!("{}", block_candidate.block_nonce);
+            block_candidate.block_nonce += 1
         }
     }
 }
